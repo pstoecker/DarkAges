@@ -27,6 +27,8 @@ functions:
 
 """
 
+from __future__ import absolute_import, division, print_function
+
 import numpy as np
 
 from .common import time_at_z, logConversion, H, nan_clean
@@ -57,7 +59,7 @@ particle_dict = {'gamma': [0,'1',2,1,1,1,0],
 def _particle_list_resolver( *particles ):
 	particles = list(particles)
 	if ('ALL' in particles) or ('all' in particles):
-		return particle_dict.keys()
+		return list(particle_dict.keys())
 	else:
 		if ('light quarks' in particles):
 			particles.pop(particles.index('light quarks'))

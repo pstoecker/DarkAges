@@ -42,6 +42,8 @@ By now there are three possible scenarios and the following wrapping methods:
 
 """
 
+from __future__ import absolute_import, division, print_function
+
 import numpy as np
 import os
 import sys
@@ -289,7 +291,7 @@ def loading_from_specfiles(fnames, transfer_functions, mass,  logEnergies=None, 
 	elif hist == 'annihilation_halos':
 		model_from_file = annihilating_halos_model(tot_spec[0], tot_spec[1], tot_spec[2], 1e9*mass,zh,fh,logEnergies,redshift, **DarkOptions)
 	else:
-		raise DarkAgesError('The method >> {:s} << cannot deal with the injection history >> {:s} <<'.format(loading_from_specfiles.func_name, hist))
+		raise DarkAgesError('The method >> {:s} << cannot deal with the injection history >> {:s} <<'.format(loading_from_specfiles.__name__, hist))
 	try:
 		assert len(channel_dict) == len(transfer_functions)
 	except AssertionError:
@@ -407,7 +409,6 @@ def access_model(model_name, force_rebuild = False, *arguments, **DarkOptions):
 	if not os.path.isdir(model_dir):
 		raise DarkAgesError('"{0}" seems not to be a proper model. Could not find the respective directory.'.format(model_name))
 	sys.path.insert(0,model_dir)
-	print len(arguments)
 	if os.path.isfile( os.path.join(model_dir, '{0}.obj'.format(model_name)) ) and not force_rebuild:
 		_run_model(model_dir, *arguments, **DarkOptions)
 	else:
@@ -424,7 +425,7 @@ def _prepare_model(model_dir):
 					_module = fname[:-4]
 				else:
 					_module = fname[:-3]
-				_temp = __import__(_module, globals(), locals(), [], -1)
+				_temp = __import__(_module, globals(), locals(), [], 0)
 				_prepare = _temp.__getattribute__('prepare')
 				file_to_run = os.path.join(model_dir,_module)
 				_found = True # If module with the "prepare"-method could be loaded exit the for loop
@@ -449,7 +450,7 @@ def _run_model(model_dir, *arguments, **DarkOptions):
 					_module = fname[:-4]
 				else:
 					_module = fname[:-3]
-				_temp = __import__(_module, globals(), locals(), [], -1)
+				_temp = __import__(_module, globals(), locals(), [], 0)
 				_run = _temp.__getattribute__('run')
 				file_to_run = os.path.join(model_dir,_module)
 				_found = True
@@ -462,7 +463,7 @@ def _run_model(model_dir, *arguments, **DarkOptions):
 		raise DarkAgesError('Could not find the method "run" in the directory of the model')
 	_cmnd.append(file_to_run)
 	if arguments:
-		for arg in arguments[0]:
+		for arg in arguments:
 			_cmnd.append(arg)
 	print_info('Executing run()-method found in "{0}.py".'.format(file_to_run))
 	_run(*_cmnd, **DarkOptions)

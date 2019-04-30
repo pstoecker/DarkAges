@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 import numpy as np
 import os
 import sys
@@ -86,7 +88,7 @@ def luminosity_accreting_bh(Energy,recipe,PBH_mass):
 		out = np.zeros_like(Energy)
 		Emin_mask = Energy > Emin
 		# Emax_mask = Ts > Energy
-	 	out[Emin_mask] = Energy[Emin_mask]**(-a)*np.exp(-Energy[Emin_mask]/Ts)
+		out[Emin_mask] = Energy[Emin_mask]**(-a)*np.exp(-Energy[Emin_mask]/Ts)
 		out[~Emin_mask] = 0.
 		# out[~Emax_mask] = 0.
 

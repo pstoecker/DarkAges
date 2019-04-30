@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import, division, print_function
+
 import os
 import sys
 import optparse
@@ -129,7 +131,7 @@ DarkOptions = dict()
 if options.extra is not None:
 	import yaml
 	with open(options.extra, 'r') as stream:
-		additional_DarkOptions = yaml.load(stream)
+		additional_DarkOptions = yaml.safe_load(stream)
 		DarkOptions.update(additional_DarkOptions)
 		del additional_DarkOptions
 
@@ -140,8 +142,8 @@ if options.script_file is not None:
 	dumpDict.update(DarkOptions)
 	dumpDict.update({'background_H0':options.background[0], 'background_Omega_m': options.background[1], 'background_Omega_r' :options.background[2]})
 	import yaml
-	with open(os.path.join( os.environ['DARKAGES_BASE'], 'pid_{:d}_{:d}.yaml'.format(os.getpid(), random_num )), 'wb') as options_dumper:
-		yaml.dump(dumpDict, options_dumper)
+	with open(os.path.join( os.environ['DARKAGES_BASE'], 'pid_{:d}_{:d}.yaml'.format(os.getpid(), random_num )), 'w') as options_dumper:
+		yaml.safe_dump(dumpDict, options_dumper)
 
 import atexit
 @atexit.register

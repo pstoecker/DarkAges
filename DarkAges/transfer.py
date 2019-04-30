@@ -11,6 +11,9 @@ Also contains methods to store (dump) an instance of this class in a file and
 to load them from this.
 """
 
+from __future__ import absolute_import, division, print_function
+from builtins import object
+
 import numpy as np
 import dill
 

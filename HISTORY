@@ -1,10 +1,16 @@
 DarkAges Revision History
 =======================
 
-v1.0.1 - Feb 14, 2017
+v1.1.0 - Apr 30, 2019
+Minor release.
+- Full Py2/Py3 compability
+- Add requirements.txt
+- Fix typo in models/simple_mix/prepare.py (unresolved merge conflict)
+
+v1.0.1 - Feb 14, 2019
 Bugfix release.
 - Remove setup.py from repository
 - Add HISTORY
 
-v1.0.0 - Feb 12, 2017
-Initial release in combination with first 9 papers.
+v1.0.0 - Feb 12, 2019
+Initial release

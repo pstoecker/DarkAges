@@ -22,6 +22,9 @@ for the most common energy injection histories.
 
 """
 
+from __future__ import absolute_import, division, print_function
+from builtins import range, object
+
 from .transfer import transfer
 from .common import f_function
 from .__init__ import DarkAgesError, get_logEnergies, get_redshift, print_info
@@ -345,7 +348,7 @@ class evaporating_model(model):
 		spec_all = PBH_spectrum_at_m( mass_at_z[-1,:], logEnergies, 'ALL', **DarkOptions)
 		del_E = np.zeros(redshift.shape, dtype=np.float64)
 		corr = np.ones(redshift.shape, dtype=np.float64)
-		for idx in xrange(del_E.shape[0]):
+		for idx in range(del_E.shape[0]):
 			del_E[idx] = trapz(spec_all[:,idx]*E**2*np.log(10),(logEnergies))
 			if del_E[idx] > 0.0:
 				corr[idx] = dMdt_at_z[idx]/del_E[idx]

@@ -27,6 +27,9 @@ In particular, these variables are
    hence only the getter-function :code:`get_redshift` can be used.
 """
 
+from __future__ import absolute_import, division, print_function
+from builtins import range
+
 import numpy as np
 np.seterr(all='ignore')
 #Silence numpy when it comes to overflows etc.
@@ -136,7 +139,7 @@ def get_background(key=None):
 	if key is None:
 		return CosmoBackground
 	else:
-		if CosmoBackground.has_key(key):
+		if key in CosmoBackground:
 			return CosmoBackground.get(key)
 		else:
 			raise DarkAgesError('CosmoBackground has no key "{0}"'.format(key))
@@ -245,14 +248,14 @@ def set_logEnergies(logE):
 	logEnergies = logE
 
 def _transfer_init_and_dump(transfer_functions):
-	for channel in channel_dict.keys():
+	for channel in list(channel_dict.keys()):
 		idx = channel_dict.get(channel)
 		transfer_functions[idx] = transfer(os.path.join(os.environ['DARKAGES_BASE'],'transfer_functions/original/Transfer_Ch{:d}.dat'.format(idx+1)))
 		transfer_dump(transfer_functions[idx], os.path.join(os.environ['DARKAGES_BASE'],'transfer_functions/transfer_Ch{:d}.obj'.format(idx+1)))
 	return transfer_functions
 
 def _transfer_load_from_dump(transfer_functions):
-	for channel in channel_dict.keys():
+	for channel in list(channel_dict.keys()):
 		idx = channel_dict.get(channel)
 		transfer_functions[idx] = transfer_load( os.path.join(os.environ['DARKAGES_BASE'], 'transfer_functions/transfer_Ch{:d}.obj'.format(idx+1)) )
 	return transfer_functions
@@ -263,7 +266,7 @@ if transfer_functions is None:
 	transfer_functions = np.empty(shape=5, dtype=transfer)
 
 	transfer_is_initialized = True
-	for i in xrange(5):
+	for i in range(5):
 		transfer_is_initialized = transfer_is_initialized and os.path.isfile(os.path.join(os.environ['DARKAGES_BASE'],'transfer_functions/transfer_Ch{:d}.obj'.format(i+1)))
 
 	if not transfer_is_initialized:
