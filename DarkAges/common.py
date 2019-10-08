@@ -257,7 +257,8 @@ def f_function(transfer_functions_log10E, log10E, z_inj, z_dep, normalization,
 		low = max(i,0)
 		#low = i
 		integrand = ( conversion(z_inj[low:], alpha=alpha) )*energy_integral[i,low:]
-		z_integral[i] = trapz( integrand, dummy[low:] )
+		#z_integral[i] = trapz( integrand, dummy[low:] )
+		z_integral[i] = integrand.sum()
 
 	result = np.empty_like( norm, dtype=np.float64 )
 	for i in range(len(norm)):
@@ -343,7 +344,7 @@ def log_fit(points,func,xgrid,exponent=1,scale='lin-log'):
 	exponent : :obj:`int`, :obj:`float`, *optional*
 		Exponent to specify the powers of :code:`points` mulitplied to
 		:code:`func` before the function is transformed into logspace.
-		(see also: :class:`logInterpolator <DarkAges.interpolator.logInterpolator>`).
+		(see also: :class:`logLinearInterpolator <DarkAges.interpolator.logLinearInterpolator>`).
 		If not given, :code:`points` is multiplied linearly (:code:`exponent=1`).
 
 	Returns
@@ -353,9 +354,8 @@ def log_fit(points,func,xgrid,exponent=1,scale='lin-log'):
 		at the points given by :code:`xgrid`.
 	"""
 
-	from .interpolator import logInterpolator
-	tmp_interpolator = logInterpolator(points, func, exponent=exponent, scale=scale)
-	#tmp_interpolator = logLinearInterpolator(points, func, exponent=exponent, scale=scale)
+	from .interpolator import logLinearInterpolator
+	tmp_interpolator = logLinearInterpolator(points, func, exponent=exponent, scale=scale)
 	out = tmp_interpolator(xgrid)
 	return out
 
@@ -467,7 +467,7 @@ def sample_spectrum(input_spec_el, input_spec_ph, input_spec_oth, input_log10E, 
 		out_oth = log_fit(input_log10E, factor2*scale_dict[scale][1]*input_spec_oth/rescaling, sampling_log10E)
 
 		# In the unphysical region E > m the spectrum needs to vanish
-		unphysical_region_mask =  (logConversion(sampling_log10E) > m)
+		unphysical_region_mask =  (logConversion(sampling_log10E) > (norm/2.))
 		out_el[unphysical_region_mask] = 0.
 		out_ph[unphysical_region_mask] = 0.
 		out_oth[unphysical_region_mask] = 0.
@@ -486,9 +486,6 @@ def sample_spectrum(input_spec_el, input_spec_ph, input_spec_oth, input_log10E, 
 def finalize(redshift, f_heat, f_lya, f_ionH, f_ionHe, f_lowE, **DarkOptions):
 	u"""Prints the table of redshift and :math:`f_c(z)` for the deposition
 	channels in question into :obj:`stdout`
-
-	Since `CLASS <http://class-code.net>`_ expects a pure table of :math:`z` and
-	:math:`f_c()z` this is the last function called during a DarkAges-session.
 
 	.. warning::
 		For the correct usage of this package together with
@@ -536,9 +533,8 @@ def finalize(redshift, f_heat, f_lya, f_ionH, f_ionHe, f_lowE, **DarkOptions):
 		f_lya = np.zeros_like(f_ionH)
 
 	first = int(DarkOptions.get('first_index',1))
-	last_idx = int(DarkOptions.get('last_index',1))
-	if last_idx == 0:
-		print_warning('We strongly discourage you to assign the value "0" to "last_index". The last entry of the table is zero for numerical reasons.')
+	last_idx = int(DarkOptions.get('last_index',0))
+
 	last = len(redshift) - last_idx
 	min_z = DarkOptions.get('lower_z_bound',0.)
 	max_z = DarkOptions.get('upper_z_bound',1e4)
@@ -550,3 +546,53 @@ def finalize(redshift, f_heat, f_lya, f_ionH, f_ionHe, f_lowE, **DarkOptions):
 	for idx in range(first,last):
 		sys.stdout.write('{:.2e}\t{:.4e}\t{:.4e}\t{:.4e}\t{:.4e}\t{:.4e}\n'.format(redshift[idx],f_heat[idx],f_lya[idx],f_ionH[idx],f_ionHe[idx],f_lowE[idx]))
 	sys.stdout.write('{:.2e}\t{:.4e}\t{:.4e}\t{:.4e}\t{:.4e}\t{:.4e}\n'.format(max_z,f_heat[last-1],f_lya[last-1],f_ionH[last-1],f_ionHe[last-1],f_lowE[last-1]))
+
+def feff_finalize(redshift, f_eff, **DarkOptions):
+	u"""Prints the table of redshift and :math:`f_eff(z)` into :obj:`stdout`
+
+	.. warning::
+		For the correct usage of this package together with
+		`CLASS <http://class-code.net>`_ the only allowed output
+		are line with a single number, containing the number of the lines
+		of the table to follow and the table
+
+		+-------+-------+
+		|   #z  | f_eff |
+		+=======+=======+
+		|   0   |       |
+		+-------+-------+
+		|  ...  |  ...  |
+		+-------+-------+
+		| 10000 |       |
+		+-------+-------+
+
+		Please make sure that all other message printed are silenced or
+		at least covered by '#' (see :meth:`print_info <DarkAges.__init__.print_info>`)
+
+	Parameters
+	----------
+	redshift : :obj:`array-like`
+		Array (:code:`shape = (k)`) with the values of redshift :math:`z`.
+		Note that here *redshift* is meant to be :math:`z` and not
+		:math:`z+1`
+	f_eff : :obj:`array-like`
+		Array (:code:`shape = (k)`) with the values of the effective efficiency factor
+		summed over all ddeposition channels (and corrections subtracted)
+	"""
+
+	redshift = redshift - np.ones_like(redshift) # Go from DarkAges-redshift (z+1) to CLASS-redshift (z)
+
+	first = int(DarkOptions.get('first_index',1))
+	last_idx = int(DarkOptions.get('last_index',0))
+
+	last = len(redshift) - last_idx
+	min_z = DarkOptions.get('lower_z_bound',0.)
+	max_z = DarkOptions.get('upper_z_bound',1e4)
+	sys.stdout.write(50*'#'+'\n')
+	sys.stdout.write('### This is the standardized output to be read by CLASS.\n### For the correct usage ensure that all other\n### "print(...)"-commands in your script are silenced.\n')
+	sys.stdout.write(50*'#'+'\n\n')
+	sys.stdout.write('#z_dep\tf_feff\n\n{:d}\n\n'.format( (last-first) + 2))
+	sys.stdout.write('{:.2e}\t{:.4e}\n'.format(min_z,f_eff[first]))
+	for idx in range(first,last):
+		sys.stdout.write('{:.2e}\t{:.4e}\n'.format(redshift[idx],f_eff[idx]))
+	sys.stdout.write('{:.2e}\t{:.4e}\n'.format(max_z,f_eff[last-1]))

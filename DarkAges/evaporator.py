@@ -131,8 +131,8 @@ def PBH_F_of_M( PBH_mass, *particles, **DarkOptions ):
 
 	# factor_dict has the structure 'spin_label' : [f, beta]
 	factor_dict = {'0':[0.267, 2.66],
-			   '1/2 N':[0.142, 4.53],
-			   '1/2 C':[0.147, 4.53],
+			   '1/2 N':[0.147, 4.53],
+			   '1/2 C':[0.142, 4.53],
 			       '1':[0.060, 6.04]}
 
 	def _single_contribution(PBH_mass, mass_of_particle, multiplicity, beta, sigmoid_factor = 0, **DarkOptions):

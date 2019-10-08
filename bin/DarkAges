@@ -82,6 +82,8 @@ parser.add_option("--extra-options", dest="extra", metavar="EXTRA.yaml",
                   help="Yaml-File with additional parameters")
 parser.add_option("--nuke-and-start-again", action='store_true', dest='nuke', default=False,
                   help="Delete all preprocessed *.obj-files (transfer-functions, dumped interpolators, models, etc.) and start from scratch")
+parser.add_option("--return_f_eff_table", action='store_true', dest='return_feff', default=False,
+                  help="Print f(z) summed over all deposition channels (with corrections) instead of each channel")
 
 (options, args) = parser.parse_args()
 if len(args) == 0:
@@ -182,6 +184,11 @@ if options.mass is None:
 
 if options.mass <= 0:
 	raise DarkAgesError('You entered an invalid value for the mass. It needs to be positive and non zero.')
+
+# For the following recipes either print the table of all deposition channels or the sum (with corrections) as f_eff(z)
+# If the option is already set via the YAML input the command-line input is ignored.
+if "print_f_eff" not in DarkOptions:
+	DarkOptions.update({"print_f_eff":options.return_feff})
 
 if options.injection_history == 'evaporating_PBH':
 	sys.exit( recipes.evaporating_PBH(options.mass, transfer_functions, **DarkOptions) )

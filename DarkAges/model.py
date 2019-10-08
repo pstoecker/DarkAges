@@ -166,7 +166,7 @@ class annihilating_model(model):
 
 		tot_spec = ref_el_spec + ref_ph_spec + ref_oth_spec
 
-		norm_by = DarkOptions.get('normalize_spectrum_by','mass')
+		norm_by = DarkOptions.get('normalize_spectrum_by','energy_integral')
 		if norm_by == 'energy_integral':
 			from .common import trapz, logConversion
 			E = logConversion(logEnergies)
@@ -202,7 +202,7 @@ class annihilating_halos_model(model):
 
 		tot_spec = ref_el_spec + ref_ph_spec + ref_oth_spec
 
-		norm_by = DarkOptions.get('normalize_spectrum_by','mass')
+		norm_by = DarkOptions.get('normalize_spectrum_by','energy_integral')
 		if norm_by == 'energy_integral':
 			from .common import trapz, logConversion
 			E = logConversion(logEnergies)
@@ -278,7 +278,7 @@ class decaying_model(model):
 
 		tot_spec = ref_el_spec + ref_ph_spec + ref_oth_spec
 
-		norm_by = DarkOptions.get('normalize_spectrum_by','mass')
+		norm_by = DarkOptions.get('normalize_spectrum_by','energy_integral')
 		if norm_by == 'energy_integral':
 			from .common import trapz, logConversion
 			E = logConversion(logEnergies)
